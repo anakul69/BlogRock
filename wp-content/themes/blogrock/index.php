@@ -1,11 +1,15 @@
-<?php
-get_header();
-?>
+<?php get_template_part('layout/header'); ?>
 
-    <main>
-        <h1>Hello from BlogRock!</h1>
-        <p>Это базовый шаблон index.php. Поздравляю, тема активна 🎉</p>
-    </main>
+<main class="content-area">
+    <div class="mx-auto px-10 2xl:px-[135px]">
+        <?php
+        if (have_posts()) :
+            while (have_posts()) : the_post();
+                the_content();
+            endwhile;
+        endif;
+        ?>
+    </div>
+</main>
 
-<?php
-get_footer();
+<?php get_footer(); ?>
