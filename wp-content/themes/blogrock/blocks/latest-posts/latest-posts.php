@@ -1,5 +1,6 @@
 <?php
 $title = get_field('title');
+$label = get_field('label');
 $posts = get_posts([
     'post_type' => 'post',
     'posts_per_page' => 4,
@@ -13,25 +14,25 @@ $posts = get_posts([
             <h2 class="text-4xl font-semibold text-center mb-12"><?= esc_html($title); ?></h2>
         <?php endif; ?>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <?php foreach ($posts as $post): setup_postdata($post); ?>
-                <a href="<?= get_permalink($post); ?>" class="group flex flex-col sm:flex-row gap-6">
-                    <div class="relative w-full sm:w-[180px] shrink-0">
-                        <div class="absolute top-[-12px] left-[-12px] w-full h-[100px] bg-secondary z-0"></div>
+                <?php
+                $author_name = get_field('author_name', $post->ID);
+                $author_avatar = get_field('author_avatar', $post->ID);
+                ?>
+                <a href="<?= get_permalink($post); ?>" class="group flex flex-col lg:flex-row gap-6">
+                    <div class="relative size-[285px] lg:size-[250px] shrink-0">
+                        <div class="absolute top-[-12px] left-[-12px] w-full size-[285px] lg:size-[235px] bg-secondary z-0"></div>
                         <div class="relative z-10">
-                            <?= get_the_post_thumbnail($post, 'medium', ['class' => 'w-full']); ?>
+                            <?= get_the_post_thumbnail($post, 'medium', ['class' => 'object-cover size-[285px] lg:size-[250px]']); ?>
                         </div>
                     </div>
 
-                    <div class="flex flex-col justify-between">
-                        <?php
-                        $categories = get_the_category($post->ID);
-                        $category_name = $categories ? $categories[0]->name : '';
-                        ?>
-                        <?php if ($category_name): ?>
-                            <span class="inline-block text-xs bg-fuchsia-600 text-white px-2 py-0.5 rounded mb-2">
-                                <?= esc_html($category_name); ?>
-                            </span>
+                    <div class="flex flex-col justify-between mt-4">
+                        <?php if ($label): ?>
+                            <span class="flex justify-center bg-third text-white w-[72px] h-[26px] px-2 py-1 mb-5 font-small">
+                    <?php echo esc_html($label); ?>
+                </span>
                         <?php endif; ?>
 
                         <h3 class="text-lg font-semibold group-hover:text-accent transition leading-snug">
@@ -40,20 +41,20 @@ $posts = get_posts([
 
                         <div class="text-sm text-gray-500 mt-2 flex gap-4 items-center flex-wrap">
                             <span class="flex items-center gap-1">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M8.25 6.75h7.5m-7.5 4.5h7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                <?= get_the_date('d F Y', $post); ?>
+                                Added:
+                                <?php
+                                $current_locale = get_locale();
+                                switch_to_locale('en_US');
+                                echo get_the_date('d F Y', $post);
+                                switch_to_locale($current_locale);
+                                ?>
                             </span>
 
                             <span class="flex items-center gap-1">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5"
-                                     viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          d="M17.25 6.75v10.5M12 6.75v10.5M6.75 6.75v10.5"/>
-                                </svg>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.25 3.125V13.125H3.75V16.3086L4.76562 15.4883L7.71484 13.125H13.75V3.125H1.25ZM2.5 4.375H12.5V11.875H7.28516L7.10938 12.0117L5 13.6914V11.875H2.5V4.375ZM15 5.625V6.875H17.5V14.375H15V16.1914L12.7148 14.375H8.02734L6.46484 15.625H12.2852L16.25 18.8086V15.625H18.75V5.625H15Z" fill="#7B7485"/>
+</svg>
+
                                 <?= get_comments_number($post->ID); ?>
                             </span>
                         </div>
@@ -62,12 +63,16 @@ $posts = get_posts([
                             <?= get_the_excerpt($post); ?>
                         </p>
 
-                        <div class="mt-4 flex items-center gap-2">
-                            <?= get_avatar(get_the_author_meta('ID'), 24, '', '', ['class' => 'rounded-full w-6 h-6']); ?>
-                            <span class="text-sm text-gray-700">
-                                <?= get_the_author_meta('display_name'); ?>
-                            </span>
-                        </div>
+                        <?php if ($author_name || $author_avatar): ?>
+                            <div class="mt-4 flex items-center gap-2">
+                                <?php if ($author_avatar): ?>
+                                    <img src="<?= esc_url($author_avatar['url']); ?>" alt="<?= esc_attr($author_name); ?>" class="w-6 h-6 rounded-full" />
+                                <?php endif; ?>
+                                <?php if ($author_name): ?>
+                                    <span class="text-sm text-gray-700"><?= esc_html($author_name); ?></span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </a>
             <?php endforeach; wp_reset_postdata(); ?>
